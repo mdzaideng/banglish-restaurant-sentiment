@@ -1,0 +1,73 @@
+# Model registry
+#
+# Every entry below was confirmed by reading the retained source files listed
+# in `verified_in`. Nothing here is inferred from output behaviour or assumed
+# from convention. See docs/REPRODUCIBILITY_LIMITATIONS.md for the one entry
+# that could NOT be recovered.
+
+vader:
+  method: "lexicon-based (VADER)"
+  library: "nltk.sentiment.SentimentIntensityAnalyzer"
+  lexicon_resource: "nltk 'vader_lexicon' (downloaded at runtime via nltk.download)"
+  threshold_convention: "compound >= 0.05 => Positive; compound <= -0.05 => Negative; else Neutral"
+  verified_in:
+    - "src/vader/*.py"
+    - "results/tables/Sentiment_Analysis_Tables_Charts.xlsx (Sheet 1, Methodology Notes)"
+
+roberta_english:
+  checkpoint: "cardiffnlp/twitter-roberta-base-sentiment-latest"
+  source: "Hugging Face Hub (loaded via transformers.AutoModelForSequenceClassification.from_pretrained)"
+  reporting_convention: "reported two ways -- (a) VADER-style compound threshold applied to (pos-neg), (b) argmax over the model's native 3-class softmax output (argmax is the recommended reading)"
+  verified_in:
+    - "src/roberta/*.py (explicit MODEL = \"cardiffnlp/twitter-roberta-base-sentiment-latest\" in every one of the 5 brand scripts)"
+  note: >
+    This is the checkpoint explicitly present in code. Do not confuse with the
+    plain "cardiffnlp/twitter-roberta-base-sentiment" (no "-latest") model --
+    they are different Hub releases. The exact revision/commit hash of the
+    Hub weights was not pinned in the retained scripts, so the precise binary
+    weights used historically cannot be guaranteed reproducible if the Hub
+    checkpoint changes upstream; see docs/REPRODUCIBILITY_LIMITATIONS.md.
+
+xlm_roberta_banglish:
+  checkpoint: "xlm-roberta-base"
+  source: "Hugging Face Hub, fine-tuned locally"
+  verified_in:
+    - "src/banglish/banglish_sentiment_pipeline.py (MODEL_NAME = \"xlm-roberta-base\")"
+  training_config_verified_in_code:
+    seed: 42
+    epochs: 10
+    train_batch_size: 16
+    eval_batch_size: 32
+    max_length: 128
+    backbone_lr: 2e-5
+    head_lr: 1e-3
+    weight_decay: 0.01
+    warmup_ratio: 0.1
+    test_size: 0.2
+    dropout: 0.2
+    class_weight_power: 0.5
+  trained_weights_availability: "NOT included in this GitHub release. ZENODO DOI: NOT YET ASSIGNED. See models/README.md."
+
+tfidf_logreg_baseline:
+  method: "TF-IDF (sklearn TfidfVectorizer) + sklearn LogisticRegression"
+  role: "mandatory baseline reported alongside the XLM-RoBERTa result, computed on the same train/val split"
+  verified_in:
+    - "src/banglish/banglish_sentiment_pipeline.py (function baseline_tfidf_logreg(), called from main())"
+  note: >
+    A second, separate classical-ML script (classical_ML.py, trained on a
+    synthetic 1000-row set and evaluated on a 112-row keyword-filtered Brand D
+    subset with 4 additional non-manuscript classifiers) exists in the
+    original project under Clean data/brand_d_classifier/ but was excluded from
+    this release as out-of-scope -- see docs/REPRODUCIBILITY_LIMITATIONS.md
+    and RELEASE_MANIFEST.csv.
+
+label_mapping:
+  convention: "star rating -> 3-class sentiment (proxy/reference label, NOT a human-annotated gold standard)"
+  rule: "1-2 stars = Negative, 3 stars = Neutral, 4-5 stars = Positive"
+  verified_in:
+    - "src/banglish/banglish_sentiment_pipeline.py (function stars_to_label)"
+    - "results/tables/Sentiment_Analysis_Tables_Charts.xlsx (Sheet 1, Methodology Notes)"
+
+mbert:
+  status: "EXCLUDED -- not a manuscript-reported method"
+  note: "Code, checkpoint, and outputs for brand_d_m_bert.py were deliberately left out of this release. See RELEASE_MANIFEST.csv."

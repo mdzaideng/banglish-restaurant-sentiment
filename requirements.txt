@@ -1,0 +1,36 @@
+# Reconstructed from `import`/`from` statements actually present in the
+# included scripts (src/**), cross-checked against the one committed venv
+# found in the original project (Clean data/brand_d_classifier/venv). See
+# docs/ENVIRONMENT_NOTES.md for what is pinned-with-evidence vs. bounded.
+#
+# The venv did NOT include nltk or openpyxl even though every VADER script
+# needs nltk and every *.xlsx-writing script needs openpyxl -- it only
+# reflects the environment used for the brand_d_classifier Transformer work, not
+# the full pipeline. Those two are added here from source-code evidence only,
+# with no retained version pin.
+
+# --- core runtime (used by src/vader, src/roberta, src/preprocessing) ---
+pandas>=2.0,<4.0          # pin uncertain: venv had 3.0.1, but that env didn't run these scripts -- see ENVIRONMENT_NOTES.md
+numpy>=1.26,<3.0          # venv had 2.4.3, same caveat as pandas
+matplotlib>=3.7,<4.0      # venv had 3.10.8, same caveat
+seaborn>=0.12,<0.14        # venv had 0.13.2, same caveat
+tqdm>=4.60
+nltk>=3.8                 # required by src/vader/*.py; absent from the retained venv entirely
+openpyxl>=3.1              # required for .xlsx read/write via pandas; absent from the retained venv entirely
+scipy>=1.10                 # used by src/roberta/*.py (scipy.special.softmax)
+langdetect>=1.0,<2         # required by src/preprocessing/*_clean_roberta.py and *_clean_vader.py (`from langdetect import detect`); absent from the retained venv entirely
+deep-translator>=1.11,<2   # required by src/preprocessing/*_translated.py (`from deep_translator import GoogleTranslator`); absent from the retained venv entirely
+
+# --- transformer / Banglish pipeline (src/banglish) ---
+torch==2.10.0              # pinned: exact version confirmed in the retained venv
+transformers==5.3.0        # pinned: exact version confirmed in the retained venv
+tokenizers==0.22.2         # pinned: exact version confirmed in the retained venv
+safetensors==0.7.0         # pinned: exact version confirmed in the retained venv
+accelerate==1.13.0         # pinned: exact version confirmed in the retained venv
+datasets>=4.0              # venv had 4.8.2; not directly imported by banglish_sentiment_pipeline.py but part of the same environment
+scikit-learn>=1.3,<2.0     # venv had 1.8.0, same caveat as pandas -- used for TfidfVectorizer/LogisticRegression baseline
+
+# --- optional: development / notebook-free verification tools ---
+# (not imported by any included script; only needed to run tests/smoke_test.py
+# and basic static checks)
+# pytest>=7.0
