@@ -364,13 +364,4 @@ Khulna-9203, Bangladesh<br><br>
 </td>
 </tr>
 </table>
-
----
-
-<div align="center">
-
-Department of Industrial Engineering and Management<br>
-Khulna University of Engineering & Technology · Khulna-9203, Bangladesh
-
 </div>
-```
