@@ -1,350 +1,376 @@
-# Banglish Restaurant Sentiment
 
-### Comparative Sentiment Analysis of Bangladeshi Restaurant Reviews
+<div align="center">
 
-*Rating-Derived Sentiment Classification of English and Code-Mixed Banglish
-Restaurant Reviews: A Descriptive Comparison of Lexicon, Linear, and
-Transformer Approaches*
+<h1>Banglish Restaurant Sentiment</h1>
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.8%2B-3776ab?style=flat-square&logo=python&logoColor=white)](requirements.txt)
-[![Release type](https://img.shields.io/badge/release%20type-code%20only-lightgrey?style=flat-square)](#what-this-repository-is)
+<p><em>Rating-Derived Sentiment Classification of English and Code-Mixed Banglish Restaurant Reviews:<br>
+A Descriptive Comparison of Lexicon, Linear, and Transformer Approaches</em></p>
+
+<br>
+
+[![DOI](https://zenodo.org/badge/1361147783.svg)](https://doi.org/10.5281/zenodo.22660963)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8%2B-3776ab?style=flat-square&logo=python&logoColor=white)](requirements.txt)
+[![Release Type](https://img.shields.io/badge/Release%20Type-Code%20Only-lightgrey?style=flat-square)](#what-this-repository-is)
+
+<br>
 
 ---
 
-## What this repository is
+</div>
 
-This is a **research-code release**: the preprocessing, VADER, RoBERTa,
-XLM-RoBERTa, and TF-IDF+LogReg-baseline code behind the manuscript above.
+> **Before running anything:** This repository ships **code only** — no row-level review data,
+> no model weights, and no figures or tables. See [`data/README.md`](data/README.md) for the
+> full explanation and the schema your own authorized data must match.
 
-**It is not a reproducibility archive and not a results archive.** It ships
-no row-level review data, no model checkpoints, and no final figures or
-tables. See `results/README.md` for a full inventory of every manuscript
-figure/table, each with its exact caption and why it is not shipped as a
-separate artifact.
+---
 
-A future Zenodo record is intended to host trained model weights and
-(pending a privacy/redistribution review) permitted data artifacts -- see
-`models/README.md` and `data/README.md`. Neither exists yet.
+## Table of Contents
 
-> **Read this before running anything:** this repository ships code, not
-> data and not results. See "Data & privacy" below and `data/README.md` for
-> why, and what schema your own authorized data needs to match.
+- [What This Repository Is](#what-this-repository-is)
+- [Study Overview](#study-overview)
+- [Methods Covered](#methods-covered)
+- [Repository Structure](#repository-structure)
+- [Installation](#installation)
+- [Pipeline Execution Order](#pipeline-execution-order)
+- [Label Definitions](#label-definitions)
+- [Model Checkpoints](#model-checkpoints)
+- [English Corpora Note](#two-independently-compiled-english-corpora)
+- [Why No Results Are Shipped](#why-this-release-ships-no-results-at-all)
+- [Reproducibility Limitations](#reproducibility-limitations)
+- [Data and Privacy](#data-and-privacy)
+- [License](#license)
+- [Citation](#citation)
+- [Authors](#authors)
 
-## Study overview
+---
 
-The study analyzes customer reviews across **five anonymized restaurant
-brands** operating in Bangladesh, referred to throughout this repository
-as **Brand A, Brand B, Brand C, Brand D, and Brand E**. Two review
-populations are covered:
+## What This Repository Is
 
-- **English reviews** -- scored with both a lexicon-based method (VADER)
-  and a transformer model (RoBERTa), per brand.
-- **Code-mixed Banglish reviews** -- scored with a fine-tuned transformer
-  (XLM-RoBERTa) and a TF-IDF + Logistic Regression baseline, on a shared
-  train/validation split.
+This is a **research-code release** — the preprocessing, VADER, RoBERTa, XLM-RoBERTa, and
+TF-IDF + Logistic Regression baseline pipelines behind the manuscript listed above.
 
-Restaurant brand identities are not disclosed anywhere in this repository,
-its code, its file names, or its documentation.
+It is **not** a reproducibility archive and **not** a results archive. It ships:
 
-## What is not included
+| Included | Not Included |
+|---|---|
+| All modeling and preprocessing scripts | Row-level review data of any kind |
+| Synthetic schema example and smoke / contract tests | Trained model checkpoints |
+| Full documentation of reproducibility limitations | Manuscript figures or tables |
+| MIT license and citation metadata | Reviewer names or personally identifying information |
 
-- **Raw or cleaned review data** -- no review text, star ratings tied to
-  reviewer identity, or per-review URLs of any kind.
-- **Reviewer names or any personally identifying information.**
-- **Final figures or tables** -- no manuscript-reported number, chart, or
-  table is shipped, copied, or recomputed here.
-- **Trained model checkpoints** -- no `.bin`/`.safetensors`/`.pt` weight
-  files. The fine-tuned XLM-RoBERTa weights are intended for a future
-  Zenodo deposit (see `models/README.md`).
+> **Do not treat this repository as reproducing or verifying any manuscript-reported number.**
+> The manuscript's agreement statistics and performance figures are its own reported results.
+> This code release neither recomputes nor confirms them.
 
-See `data/README.md` for the full data-exclusion rationale and schema, and
-`docs/REPRODUCIBILITY_LIMITATIONS.md` for exactly what this release can
-and cannot independently verify against the manuscript's reported numbers.
+---
 
-## Manuscript method scope
+## Study Overview
 
-This release covers exactly the methods reported in the manuscript:
+The study analyzes customer reviews across **five anonymized restaurant brands** operating in
+Bangladesh, referred to throughout this repository as **Brand A, Brand B, Brand C, Brand D,
+and Brand E**. Two review populations are covered:
 
-- **VADER** (lexicon-based) on English reviews, per restaurant brand
-- **RoBERTa** (`cardiffnlp/twitter-roberta-base-sentiment-latest`) on
-  English reviews, per restaurant brand
-- **XLM-RoBERTa** (`xlm-roberta-base`, fine-tuned) on code-mixed Banglish
-  reviews
-- **TF-IDF + Logistic Regression** baseline, reported alongside XLM-RoBERTa
-  on the same Banglish train/validation split
-- Preprocessing required for the above (translation/language-splitting,
-  cleaning)
+- **English reviews** — scored with both a lexicon-based method (VADER) and a transformer
+  model (RoBERTa), per brand.
+- **Code-mixed Banglish reviews** — scored with a fine-tuned transformer (XLM-RoBERTa) and a
+  TF-IDF + Logistic Regression baseline, on a shared train / validation split.
 
-An mBERT model and a separate synthetic-data classical-ML comparison exist
-in the original project but are **not** manuscript-reported methods and are
-excluded here -- see `docs/REPRODUCIBILITY_LIMITATIONS.md`, item 7.
+Restaurant brand identities are not disclosed anywhere in this repository, its code, its file
+names, or its documentation.
 
-## Repository structure
+---
+
+## Methods Covered
+
+| Pipeline | Model | Target Language |
+|---|---|---|
+| Lexicon-based | VADER | English reviews (per brand) |
+| Transformer | RoBERTa — `cardiffnlp/twitter-roberta-base-sentiment-latest` | English reviews (per brand) |
+| Fine-tuned Transformer | XLM-RoBERTa — `xlm-roberta-base` | Code-mixed Banglish reviews |
+| Baseline | TF-IDF + Logistic Regression | Banglish (same train / val split) |
+
+An mBERT model and a separate synthetic-data classical-ML comparison exist in the original
+project but are **not** manuscript-reported methods and are excluded here — see
+[`docs/REPRODUCIBILITY_LIMITATIONS.md`](docs/REPRODUCIBILITY_LIMITATIONS.md), item 7.
+
+---
+
+## Repository Structure
 
 ```
-README.md                    -- this file
-LICENSE                       -- MIT license (code)
-CITATION.cff                  -- how to cite this software
-requirements.txt              -- reconstructed dependencies (see docs/ENVIRONMENT_NOTES.md)
-.gitignore
-RELEASE_MANIFEST.csv          -- every file copied/excluded/generated, with SHA-256 hashes and reasons
-RELEASE_NOTES.md              -- what this release is/isn't, and validation results
-config/
-  model_registry.yaml          -- exact checkpoints/hyperparameters, confirmed in code
-data/
-  README.md                    -- why no row-level data is included, schemas, label mapping
-  LICENSE_DATA.md               -- data licensing statement (no license granted for 3rd-party review data)
-  example/synthetic_schema_example.csv  -- FABRICATED schema demo, not study data
-src/
-  preprocessing/                -- per-brand translation/cleaning scripts
-  vader/                        -- per-brand VADER scoring scripts
-  roberta/                      -- per-brand RoBERTa scoring scripts
-  banglish/                     -- XLM-RoBERTa + TF-IDF/LogReg baseline (Banglish)
-  baseline/                     -- see baseline/README.md (baseline lives inside banglish/ script)
-  evaluation/                   -- see evaluation/README.md (aggregation gap, not implemented)
-  utilities/                    -- CSV<->Excel helper scripts
-archive/original_scripts/       -- byte-identical, unrenamed copies of every included script (originals, defects and all)
-results/
-  README.md                     -- inventory of every manuscript Table 1-12 / Figure 1-9, exact captions, status + provenance. No figures/tables shipped.
-models/
-  README.md                     -- model weight availability (future Zenodo deposit)
-docs/
-  REPRODUCIBILITY_LIMITATIONS.md -- read this: checkpoint status, data conflicts, aggregation gap, Banglish denominator, figure/table numbering
-  CODE_CHANGES.md               -- exact code defects repaired for this release, before/after, and why
-  ENVIRONMENT_NOTES.md
-  DATA_PROVENANCE.md
-  PIPELINE.md
-tests/
-  smoke_test.py                 -- synthetic-data-only smoke test
-  test_preprocessing_output_contract.py -- fixture test: preprocessing output filenames match scorer input filenames
+banglish-restaurant-sentiment/
+│
+├── README.md                              ← this file
+├── LICENSE                                ← MIT License
+├── CITATION.cff                           ← citation metadata
+├── requirements.txt                       ← reconstructed dependencies
+├── RELEASE_MANIFEST.csv                   ← all files with SHA-256 hashes and rationale
+├── RELEASE_NOTES.md                       ← validation results and release scope
+├── .gitignore
+│
+├── config/
+│   └── model_registry.yaml               ← exact checkpoints and hyperparameters
+│
+├── data/
+│   ├── README.md                         ← schemas, privacy rationale, label mapping
+│   ├── LICENSE_DATA.md                   ← data licensing statement
+│   └── example/
+│       └── synthetic_schema_example.csv  ← fabricated schema demo (not study data)
+│
+├── src/
+│   ├── preprocessing/                    ← per-brand translation and cleaning scripts
+│   ├── vader/                            ← per-brand VADER scoring scripts
+│   ├── roberta/                          ← per-brand RoBERTa scoring scripts
+│   ├── banglish/                         ← XLM-RoBERTa + TF-IDF/LogReg (Banglish)
+│   ├── baseline/                         ← see baseline/README.md
+│   ├── evaluation/                       ← see evaluation/README.md (aggregation gap)
+│   └── utilities/                        ← CSV ↔ Excel helper scripts
+│
+├── archive/
+│   └── original_scripts/                 ← byte-identical originals (defects preserved)
+│
+├── results/
+│   └── README.md                         ← inventory of Tables 1–12 / Figures 1–9
+│                                            with exact captions; no artifacts shipped
+│
+├── models/
+│   └── README.md                         ← model weight availability (future Zenodo)
+│
+├── docs/
+│   ├── REPRODUCIBILITY_LIMITATIONS.md    ← read this first
+│   ├── CODE_CHANGES.md                   ← exact defects repaired, before/after
+│   ├── ENVIRONMENT_NOTES.md
+│   ├── DATA_PROVENANCE.md
+│   └── PIPELINE.md
+│
+└── tests/
+    ├── smoke_test.py                      ← synthetic-data-only smoke test
+    └── test_preprocessing_output_contract.py
 ```
+
+---
 
 ## Installation
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate   # or .venv\Scripts\activate on Windows
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-See `docs/ENVIRONMENT_NOTES.md` for which pins are exact-evidence vs.
-best-effort bounded ranges.
-
-### NLTK resource setup (required for VADER)
+**NLTK resource — required for VADER:**
 
 ```bash
 python -m nltk.downloader vader_lexicon
 ```
 
-## Input-data schemas
+See [`docs/ENVIRONMENT_NOTES.md`](docs/ENVIRONMENT_NOTES.md) for which dependency pins are
+exact-evidence vs. best-effort bounded ranges.
 
-See `data/README.md` for the full column-level schema for both the English
-(`name, stars, reviews`) and Banglish (`name, stars, review`) pipelines, and
-for the privacy reasons no real review data ships with this repository.
+---
 
-## Pipeline execution order
+## Pipeline Execution Order
 
-See `docs/PIPELINE.md`. In short: preprocessing -> VADER / RoBERTa (English,
-independent of each other) -> Banglish XLM-RoBERTa + TF-IDF/LogReg baseline.
-**Aggregation of per-brand outputs into the manuscript's final tables is an
-unresolved manual step in the original project -- no script for it exists,
-and none was invented here.** See `docs/REPRODUCIBILITY_LIMITATIONS.md`,
-item 2.
+```
+preprocessing
+    └── brand_a_clean_vader.py / brand_a_clean_roberta.py  (repeat per brand)
+         │
+         ├── src/vader/        VADER scoring    (English, independent per brand)
+         ├── src/roberta/      RoBERTa scoring  (English, independent per brand)
+         └── src/banglish/     XLM-RoBERTa + TF-IDF/LogReg baseline (Banglish)
+```
 
-Each script expects its input file(s) in its current working directory
-(unchanged from the original project's convention -- see
-`docs/CODE_CHANGES.md` for why no path-handling changes were made).
+Each script expects its input file(s) in its **current working directory**, unchanged from the
+original project's convention. See [`docs/PIPELINE.md`](docs/PIPELINE.md) for the full
+execution table and [`docs/CODE_CHANGES.md`](docs/CODE_CHANGES.md) for why no path-handling
+changes were made.
 
-## Expected outputs
+> **Note:** Aggregation of per-brand outputs into the manuscript's final cross-brand tables is
+> an unresolved manual step — no script for it exists, and none was invented here. See
+> [`docs/REPRODUCIBILITY_LIMITATIONS.md`](docs/REPRODUCIBILITY_LIMITATIONS.md), item 2.
 
-See the table in `docs/PIPELINE.md`.
+---
 
-## Label definitions
+## Label Definitions
 
-Star rating is mapped to a 3-class sentiment label as follows, confirmed
-directly in `src/banglish/banglish_sentiment_pipeline.py`:
+Star ratings are mapped to a 3-class proxy label, confirmed directly in
+`src/banglish/banglish_sentiment_pipeline.py`:
 
-| Stars | Label |
-|---|---|
-| 1-2 | Negative |
+| Stars | Sentiment Label |
+|:---:|:---|
+| 1 – 2 | Negative |
 | 3 | Neutral |
-| 4-5 | Positive |
+| 4 – 5 | Positive |
 
-**This is a proxy/reference label derived from the star rating, not a
-human-expert-annotated gold standard.** English-dataset accuracy/F1 figures
-are computed against this proxy; only the Banglish XLM-RoBERTa validation
-metrics are genuine held-out performance figures. See
-`docs/REPRODUCIBILITY_LIMITATIONS.md`, item 8, and
-`data/README.md`.
+This is a **proxy label derived from the star rating, not a human-expert-annotated gold
+standard.** English-dataset accuracy and F1 figures are computed against this proxy. Only the
+Banglish XLM-RoBERTa validation metrics are genuine held-out performance figures. See
+[`docs/REPRODUCIBILITY_LIMITATIONS.md`](docs/REPRODUCIBILITY_LIMITATIONS.md), item 8.
 
-## Two independently compiled English corpora
+---
 
-The manuscript reports two independently compiled English corpora **by
-design** -- a VADER-scored corpus and a separately compiled,
-non-row-identical RoBERTa-scored corpus (Table 1) -- not a data-integrity
-conflict; see `docs/REPRODUCIBILITY_LIMITATIONS.md`, item 1. Separately,
-the retained project also contains a much larger raw compilation (not
-included in this repository). Neither of the manuscript's two corpora, nor
-that larger raw file, is included in this repository (all hold real
-reviewer names and raw text -- see `data/README.md`). Which retained raw
-source, if either, was the actual input to the manuscript's two corpora is
-**not established** from the retained files -- see
-`docs/REPRODUCIBILITY_LIMITATIONS.md`, item 10.
+## Model Checkpoints
 
-## Why this release ships no results at all
+| Model | Checkpoint | Confirmed in |
+|---|---|---|
+| RoBERTa (English) | `cardiffnlp/twitter-roberta-base-sentiment-latest` | All five `src/roberta/*.py` scripts |
+| XLM-RoBERTa (Banglish) | `xlm-roberta-base` (fine-tuned) | `src/banglish/banglish_sentiment_pipeline.py` |
 
-This is a **policy choice**, made independently of whatever the
-manuscript's own numbers turn out to be (see below: this release has not
-independently verified the manuscript's English-corpus or matched-subset
-figures either way). This repository draws a hard line at "code only"
-because:
+The exact Hugging Face Hub revision/commit is not pinned in either the code or the manuscript.
+Fine-tuned XLM-RoBERTa weights are **not** included in this repository. A future Zenodo
+deposit is planned — see [`models/README.md`](models/README.md).
 
-1. None of the underlying review corpora are shipped in this release (see
-   `data/README.md`), so even fully-traceable computations cannot actually
-   be regenerated from this repository alone.
-2. Shipping a subset of result figures/tables -- even ones that look
-   internally consistent -- would invite readers to treat this repository
-   as a source of verified results, which it is not meant to be.
+---
 
-**English corpora and matched subset.** The manuscript reports separate
-English-corpus totals (11,235 VADER-scored and 11,783 RoBERTa-scored) and
-a 9,892-row matched subset. Because raw data and a retained
-aggregation/matching script are not publicly available, this repository
-cannot independently reproduce or verify these aggregate values or the
-reported agreement statistic. See `docs/REPRODUCIBILITY_LIMITATIONS.md`,
-item 1.
+## Two Independently Compiled English Corpora
 
-**Year-wise Table 3 / Figure 2.** The manuscript reports year-wise
-review-volume results. Their underlying timestamped source data and
-generation procedure are not included in this code release; therefore
-these items are documented as manuscript-reported, not independently
-reproducible from the release. See
-`docs/REPRODUCIBILITY_LIMITATIONS.md`, item 3.
+The manuscript reports two independently compiled English corpora **by design**: a
+VADER-scored corpus and a separately compiled, non-row-identical RoBERTa-scored corpus
+(Table 1). This is not a data-integrity conflict. Neither corpus is included here — all files
+carry real reviewer names and unredacted text. See
+[`docs/REPRODUCIBILITY_LIMITATIONS.md`](docs/REPRODUCIBILITY_LIMITATIONS.md), item 1.
 
-Two further items remain open, disclosed by the manuscript's own text:
+---
 
-**The Banglish denominator.** The manuscript's Abstract, Sections 3.2/3.5,
-and Table 1/Table 4 all state that 975 valid Banglish reviews were used,
-but that the documented 780/196 train/validation split sums to 976 --
-described in the manuscript itself as "unresolved" and carried through the
-Banglish results. This release's own reading of `training_metrics_v2.json`
-reports the same discrepancy independently; neither source has been used
-to verify the other. See `docs/REPRODUCIBILITY_LIMITATIONS.md`, item 11.
+## Why This Release Ships No Results at All
 
-**The exact RoBERTa checkpoint revision.** Retained code directly supports
-the checkpoint name (`cardiffnlp/twitter-roberta-base-sentiment-latest`,
-present verbatim in `src/roberta/*.py`); the manuscript's text states the
-same name. Neither the code nor the manuscript records the exact
-historical Hugging Face revision/commit or a pinned historical label
-mapping. See `docs/REPRODUCIBILITY_LIMITATIONS.md`, item 5.
+This is a **policy choice**, made independently of whatever the manuscript's numbers turn out
+to be. This repository draws a hard line at "code only" because:
 
-See `results/README.md` for the complete, per-item inventory of all
-Figures 1-9 and Tables 1-12, with exact captions.
+1. None of the underlying review corpora are shipped (see [`data/README.md`](data/README.md)),
+   so even fully-traceable computations cannot be regenerated from this repository alone.
+2. Shipping a subset of result figures or tables — even ones that appear internally consistent
+   — would invite readers to treat this repository as a source of verified results, which it
+   is not intended to be.
 
-**Bottom line: do not treat this repository as reproducing or verifying
-any manuscript-reported number.** The manuscript's own agreement statistic
-and performance figures are its own reported results, and this code
-release neither recomputes nor confirms them.
+---
 
-## Current reproducibility limitations
+## Reproducibility Limitations
 
-Summarized here; full detail in `docs/REPRODUCIBILITY_LIMITATIONS.md`:
+Full detail in [`docs/REPRODUCIBILITY_LIMITATIONS.md`](docs/REPRODUCIBILITY_LIMITATIONS.md).
 
-1. Two intermediate project files (neither shipped) disagreed with each
-   other and with the manuscript's reported English-corpus totals (11,235
-   VADER-scored, 11,783 RoBERTa-scored). This release cannot independently
-   reproduce or verify the manuscript's own totals, or its 9,892-row
-   matched-subset/agreement figures -- no raw data or aggregation/matching
-   script is included. See `docs/REPRODUCIBILITY_LIMITATIONS.md`, item 1.
-2. No script reconstructs the manuscript's cross-brand aggregated tables
-   (Tables 5-9/12, Figures 4-6/9) from per-brand outputs (documented as a
-   manual/undocumented gap, not implemented).
-3. Two figures (year-wise review-volume plots) remain excluded from this
-   release, not because their data is untrustworthy: the manuscript itself
-   reports this exact year-wise data as Table 3/Figure 2. They are
-   excluded under the same code-only-release policy as every other
-   manuscript figure.
-4. Three additional figures existed only in a non-finalized scratch folder
-   in the original project and were excluded as non-final.
-5. The checkpoint name `cardiffnlp/twitter-roberta-base-sentiment-latest`
-   is present verbatim in retained code and stated in the manuscript's own
-   text; the exact Hugging Face Hub revision/commit is not pinned in
-   either, and neither records a pinned historical label mapping.
-6. The fine-tuned XLM-RoBERTa weights are excluded from this GitHub release
-   entirely (future Zenodo deposit).
-7. mBERT and a synthetic-data-only classical-ML comparison were judged
-   out-of-scope relative to the manuscript's reported methods (an
-   interpretive call the authors should confirm).
-8. Static compilation and the synthetic smoke/contract tests were
-   executed for this release (see `RELEASE_NOTES.md` for exact commands
-   and results). No full raw-data or model-training/inference pipeline was
-   executed -- no manuscript-reported number was reproduced or verified by
-   running the modeling code.
-9. This release ships **no** `results/figures/` or `results/tables/` at
-   all, by policy -- see `results/README.md` for the complete,
-   manuscript-verbatim inventory of Figures 1-9 and Tables 1-12.
-10. It is not established from any retained file which raw English
-    compilation, if either, underlies the manuscript's two reported
-    English corpora.
-11. The Banglish denominator discrepancy (975 vs. 976) is a genuine,
-    still-open limitation, reported independently both by this release's
-    own inspection of `training_metrics_v2.json` and by the manuscript's
-    own Abstract and Sections 3.2/3.5/6.2 -- neither source has verified
-    the other; both report the same open inconsistency.
-12. The manuscript contains exactly Figures 1-9 and Tables 1-12,
-    reproduced verbatim in `results/README.md`. Earlier project drafts
-    used different, more extensive numbering that does not match the
-    manuscript and are not used to determine manuscript structure
-    anywhere in this repository.
+<details>
+<summary>Click to expand the full list</summary>
 
-## Exact checkpoint status
+1. **English corpus totals unverified** — the manuscript reports 11,235 VADER-scored and
+   11,783 RoBERTa-scored reviews and a 9,892-row matched subset. No raw data or aggregation
+   script is included; this release cannot independently reproduce or verify these figures.
+2. **No cross-brand aggregation script** — the per-brand to cross-brand table step was
+   undocumented in the original project and was not reconstructed here.
+3. **Year-wise data excluded** — Table 3 / Figure 2 timestamped source data and generation
+   procedure are not included in this release.
+4. **Three non-final figures excluded** — existed only in a scratch folder in the original
+   project; treated as non-final.
+5. **RoBERTa checkpoint revision unpinned** — the checkpoint name is confirmed in code and
+   manuscript; the exact Hugging Face Hub revision/commit and historical label mapping are not
+   recorded in either.
+6. **Fine-tuned XLM-RoBERTa weights excluded** — future Zenodo deposit; see
+   [`models/README.md`](models/README.md).
+7. **mBERT and synthetic classical-ML excluded** — judged out of scope relative to the
+   manuscript's reported methods (authors should confirm).
+8. **No full pipeline execution** — only static compilation and synthetic smoke/contract tests
+   were run. No manuscript-reported number was reproduced.
+9. **No results artifacts shipped** — see [`results/README.md`](results/README.md) for the
+   manuscript-verbatim inventory of Figures 1–9 and Tables 1–12.
+10. **Raw English input file not established** — which retained raw compilation underlies the
+    manuscript's two corpora is not determinable from retained files.
+11. **Banglish denominator discrepancy (975 vs. 976)** — the manuscript states 975 valid
+    reviews but the training run recorded 780 + 196 = 976. Both this release's inspection of
+    `training_metrics_v2.json` and the manuscript's own Abstract / Sections 3.2/3.5/6.2
+    report this as unresolved.
+12. **Authoritative manuscript numbering** — the manuscript contains exactly Figures 1–9 and
+    Tables 1–12, reproduced verbatim in `results/README.md`. Earlier project drafts used
+    different numbering and are not used anywhere in this repository.
 
-- **RoBERTa (English):** `cardiffnlp/twitter-roberta-base-sentiment-latest`
-  -- confirmed explicitly in code (`MODEL = ...` in all five
-  `src/roberta/*.py` scripts). Not a guess, not the plain
-  `cardiffnlp/twitter-roberta-base-sentiment` model.
-- **XLM-RoBERTa (Banglish):** `xlm-roberta-base` -- confirmed explicitly in
-  code (`MODEL_NAME = ...` in `src/banglish/banglish_sentiment_pipeline.py`).
-  Fine-tuned weights excluded from GitHub; see `models/README.md`.
+</details>
 
-## Data & privacy and third-party-platform limitations
+---
 
-No row-level review data (raw, cleaned, translated, or scored; English or
-Banglish) is included in this repository. Every such file inspected in the
-original project carried a real reviewer display name and unredacted
-review text scraped from Google Maps; raw files additionally carried a
-per-review URL. See `data/README.md` for the full classification table and
-instructions for supplying your own authorized data.
+## Data and Privacy
 
-Restaurant brand identities are likewise not disclosed: all five brands
-are referred to only as **Brand A** through **Brand E** throughout this
-repository, including in file names, folder names, code comments, and
-configuration.
+No row-level review data — raw, cleaned, translated, or scored; English or Banglish — is
+included. Every file inspected in the original project carried real reviewer display names and
+unredacted review text scraped from Google Maps.
 
-## Model-weight availability
+Restaurant brand identities are likewise not disclosed. All five brands are referred to only
+as **Brand A** through **Brand E** throughout this repository, including in file names, folder
+names, code comments, and configuration.
 
-`ZENODO DOI: NOT YET ASSIGNED`. See `models/README.md`.
+See [`data/README.md`](data/README.md) for the full classification table and instructions for
+supplying your own authorized data.
+
+---
 
 ## License
 
-This project's code is licensed under the [MIT License](LICENSE). See
-`data/LICENSE_DATA.md` for the separate data-licensing statement (no
-license is granted for third-party review data, because none is shipped).
+This project's code is licensed under the **MIT License** — see [`LICENSE`](LICENSE) for the
+full text. Data is separately governed — see [`data/LICENSE_DATA.md`](data/LICENSE_DATA.md).
+No license is granted for the underlying third-party review data, because none is shipped.
+
+---
 
 ## Citation
 
-If you use this code, please cite it using the metadata in
-[`CITATION.cff`](CITATION.cff).
+If you use this code, please cite it using the metadata in [`CITATION.cff`](CITATION.cff).
+
+**Zenodo DOI:** [10.5281/zenodo.22660964](https://doi.org/10.5281/zenodo.22660964)
+
+```bibtex
+@software{HasanRatul2026banglish,
+  author    = {Hasan Ratul, Shahriar and Hossain, Md. Zaid and Islam, Md. Shahriar},
+  title     = {Comparative Sentiment Analysis of Bangladeshi Restaurant Reviews
+               -- Research Code Release},
+  version   = {1.0.0},
+  date      = {2026-09-08},
+  url       = {https://github.com/mdzaideng/banglish-restaurant-sentiment},
+  doi       = {10.5281/zenodo.22660964},
+  license   = {MIT}
+}
+```
+
+---
 
 ## Authors
 
-- **Shahriar Hasan Ratul** -- Department of Industrial Engineering and
-  Management, Khulna University of Engineering & Technology, Khulna-9203,
-  Bangladesh. [ORCID: 0009-0000-0155-5516](https://orcid.org/0009-0000-0155-5516)
-- **Md. Zaid Hossain** -- Department of Industrial Engineering and
-  Management, Khulna University of Engineering and Technology,
-  Khulna-9203, Bangladesh. [ORCID: 0009-0003-3301-3609](https://orcid.org/0009-0003-3301-3609)
-- **Md. Shahriar Islam** -- Department of Industrial Engineering and
-  Management, Khulna University of Engineering and Technology,
-  Khulna-9203, Bangladesh. [ORCID: 0009-0005-7551-166X](https://orcid.org/0009-0005-7551-166X)
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**Shahriar Hasan Ratul**<br>
+Department of Industrial Engineering and Management<br>
+Khulna University of Engineering & Technology<br>
+Khulna-9203, Bangladesh<br><br>
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0000--0155--5516-a6ce39?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0000-0155-5516)
+
+</td>
+<td width="33%" valign="top">
+
+**Md. Zaid Hossain**<br>
+Department of Industrial Engineering and Management<br>
+Khulna University of Engineering and Technology<br>
+Khulna-9203, Bangladesh<br><br>
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0003--3301--3609-a6ce39?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0003-3301-3609)
+
+</td>
+<td width="33%" valign="top">
+
+**Md. Shahriar Islam**<br>
+Department of Industrial Engineering and Management<br>
+Khulna University of Engineering and Technology<br>
+Khulna-9203, Bangladesh<br><br>
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0005--7551--166X-a6ce39?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0005-7551-166X)
+
+</td>
+</tr>
+</table>
+
+---
+
+<div align="center">
+
+Department of Industrial Engineering and Management<br>
+Khulna University of Engineering & Technology · Khulna-9203, Bangladesh
+
+</div>
+```
